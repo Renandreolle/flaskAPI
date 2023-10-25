@@ -5,3 +5,4 @@ Werkzeug == 2.2.2
 psycopg2-binary
 #flasgger == 0.9.7b2
 flask-restx
+gunicorn

@@ -1,8 +1,10 @@
 import os
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from flasgger import Swagger
 
 app = Flask(__name__)
+swagger = Swagger(app)
 
 connect = os.getenv('CONNECTION')
 app.config['SQLALCHEMY_DATABASE_URI'] = connect

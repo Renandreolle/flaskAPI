@@ -1,10 +1,20 @@
 import os
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
-from flasgger import Swagger
+from flask_restplus import Api, Resource
+
 
 app = Flask(__name__)
-swagger = Swagger(app)
+api = Api(app, doc='/swagger/')
+
+ns = api.namespace('your_namespace', description='Your API operations')
+@ns.route('/your_endpoint')
+class YourResource(Resource):
+    def get(self):
+        """
+        Your GET operation description here.
+        """
+        return {'message': 'GET operation response'}
 
 connect = os.getenv('CONNECTION')
 app.config['SQLALCHEMY_DATABASE_URI'] = connect

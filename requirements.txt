@@ -3,4 +3,5 @@ flask == 2.2
 Flask-SQLAlchemy == 3.0.3
 Werkzeug == 2.2.2
 psycopg2-binary
-flasgger == 0.9.7b2
+#flasgger == 0.9.7b2
+flask-restplus

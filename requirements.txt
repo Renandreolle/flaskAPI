@@ -1,5 +1,5 @@
 pip == 23.3.1
 flask == 2.2
-Flask-SQLAlchemy == 3.0.0
+Flask-SQLAlchemy == 3.0.3
 Werkzeug == 2.2.2
 psycopg2-binary

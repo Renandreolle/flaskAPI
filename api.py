@@ -1,63 +1,116 @@
+import os
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://your_pg_user:your_pg_password@your_pg_host/your_database_name'
-
+connect = os.getenv('CONNECTION')
+app.config['SQLALCHEMY_DATABASE_URI'] = connect
 db = SQLAlchemy(app)
 
-# Task model
+"ID", "nome", "idade", "nota do primeiro semestre", "nota do segundo semestre", "nome do professor", "número da sala"
 class Alunos(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(128), nullable=False)
+    __tablename__ = 'alunos'
 
-# Route to get all tasks (GET request)
+    ID = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(255))
+    idade = db.Column(db.Integer)
+    nota1 = db.Column(db.Float(precision=2))
+    nota2 = db.Column(db.Float(precision=2))
+    nome_professor = db.Column(db.String(255))
+    numero_sala = db.Column(db.Integer)
+
+
 @app.route('/alunos', methods=['GET'])
-def get_tasks():
+def get_alunos():
     alunos = Alunos.query.all()
-    aluno_list = [{'id': aluno.id, 'title': aluno.title} for aluno in alunos]
-    return jsonify({'alunos': aluno_list})
+    aluno_list = []
+    for aluno in alunos:
+        aluno_data = {
+            'ID': aluno.ID,
+            'nome': aluno.nome,
+            'idade': aluno.idade,
+            'nota do primeiro semestre': float(aluno.nota1),
+            'nota do segundo semestre': float(aluno.nota2),
+            'nome do professor': aluno.nome_professor,
+            'número da sala': aluno.numero_sala
+        }
+        aluno_list.append(aluno_data)
+    return jsonify({'alunos': aluno_list}), 200
 
-# Route to create a new task (POST request)
+
+@app.route('/alunos/<int:aluno_id>', methods=['GET'])
+def get_aluno(aluno_id):
+    try:
+        aluno = Alunos.query.get(aluno_id)
+    
+        aluno_data = {
+            'ID': aluno.ID,
+            'nome': aluno.nome,
+            'idade': aluno.idade,
+            'nota do primeiro semestre': float(aluno.nota1),
+            'nota do segundo semestre': float(aluno.nota2),
+            'nome do professor': aluno.nome_professor,
+            'número da sala': aluno.numero_sala
+        }
+        return jsonify(aluno_data), 200
+    except:
+        return jsonify({'error':'Aluno not found'}), 404
+    
+
 @app.route('/alunos', methods=['POST'])
 def create_aluno():
     data = request.get_json()
-    if 'title' in data:
-        title = data['title']
-        new_aluno = Alunos(title=title)
+    try:
+        nome = data['nome']
+        idade = data['idade']
+        nota1 = data['nota do primeiro semestre']
+        nota2 = data['nota do segundo semestre']
+        nome_professor = data['nome do professor']
+        numero_sala = data['número da sala']
+        new_aluno = Alunos(nome=nome, idade=idade, nota1=nota1, nota2=nota2, nome_professor=nome_professor, numero_sala=numero_sala)
         db.session.add(new_aluno)
         db.session.commit()
-        return jsonify({'message': 'Task created successfully'})
-    else:
-        return jsonify({'error': 'Title is required'}), 400
+        return jsonify(new_aluno), 201
+    except:
+        return jsonify({'error': 'Bad Request'}), 400
 
-# Route to update an existing task (PUT request)
+
 @app.route('/alunos/<int:aluno_id>', methods=['PUT'])
 def update_aluno(aluno_id):
     data = request.get_json()
-    if 'title' in data:
-        title = data['title']
+    try:
+        nome = data['nome']
+        idade = data['idade']
+        nota1 = data['nota do primeiro semestre']
+        nota2 = data['nota do segundo semestre']
+        nome_professor = data['nome do professor']
+        numero_sala = data['número da sala']
         aluno = Alunos.query.get(aluno_id)
         if aluno:
-            aluno.title = title
+            aluno.nome = nome
+            aluno.idade = idade
+            aluno.nota1 = nota1
+            aluno.nota2 = nota2
+            aluno.nome_professor = nome_professor
+            aluno.numero_sala = numero_sala
             db.session.commit()
-            return jsonify({'message': 'Task updated successfully'})
+            return jsonify(aluno), 200
         else:
-            return jsonify({'error': 'Task not found'}), 404
-    else:
-        return jsonify({'error': 'Title is required'}), 400
+            return jsonify({'error': 'Aluno not found'}), 404
+    except:
+        return jsonify({'error': 'Bad Request'}), 400
 
-# Route to delete a task (DELETE request)
+
 @app.route('/alunos/<int:aluno_id>', methods=['DELETE'])
 def delete_aluno(aluno_id):
     aluno = Alunos.query.get(aluno_id)
     if aluno:
         db.session.delete(aluno)
         db.session.commit()
-        return jsonify({'message': 'Task deleted successfully'})
+        return '', 204
     else:
-        return jsonify({'error': 'Task not found'}), 404
+        return jsonify({'error': 'Aluno not found'}), 404
 
 if __name__ == '__main__':
     app.run(debug=True)
